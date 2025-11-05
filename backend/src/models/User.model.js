@@ -1,56 +1,103 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, model } from 'mongoose';
+import bcrypt from 'bcryptjs';
+import isEmail from 'validator/lib/isEmail.js';
 
 
-const userSchema = new mongoose.Schema({
-    userName: {
-        type: String,
-        required: [true, "Username is required"],
-        trim: true,
-        maxLength: [50, "Username should not exceed 50 characters."],
-        minLength: [3, "Username should be at least 3 characters."],
+const PROVIDERS = ['local', 'google'];
+
+
+const userSchema = new Schema(
+    {
+        name: {
+            type: String,
+            trim: true,
+            minlength: 3,
+            maxlength: 80
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+            validate: [isEmail, 'Invalid email address']
+        },
+
+        // Only stored for local auth; optional for OAuth users
+        passwordHash: {
+            type: String,
+            select: false
+        },
+        authProvider: {
+            type: String,
+            enum: PROVIDERS,
+            default: 'local'
+        },
+        googleId: {
+            type: String,
+            index: true,
+            sparse: true
+        },
+        role: {
+            type: String,
+            enum: ['user', 'admin'],
+            default: 'user'
+        },
+        isEmailVerified: {
+            type: Boolean,
+            default: false
+        },
+        lastLoginAt: {
+            type: Date,
+            default: null,
+        },
     },
-    email: {
-        type: String,
-        required: [true, "Email is required"],
-        unique: true,
-        trim: true,
-        lowercase: true,
-        match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Please enter a valid email address"],
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: [6, "Password should be at least 6 characters long"],
-    },
-    refreshToken: {
-        type: String,
-        select: false, // Don't return this field by default in queries
-    },
-    lastLogin: {
-        type: Date,
-        default: null,
+    {
+        timestamps: true,
+        versionKey: false,
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.passwordHash; // never leak
+                return ret;
+            }
+        }
     }
-}, { timestamps: true });
+);
 
-// Virtual field to fetch all URLs for a user
-userSchema.virtual("urls", {
-    ref: "Url",
-    localField: "_id",
-    foreignField: "user",
-});
 
-// Combined method to update refresh token and last login in one operation
-userSchema.methods.updateAuthTokens = function (refreshToken) {
-    this.refreshToken = refreshToken;
-    this.lastLogin = new Date();
-    return this.save({ validateBeforeSave: false });
+// Indexes
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ googleId: 1 }, { sparse: true });
+
+
+// Password helpers
+userSchema.methods.setPassword = async function setPassword(plain) {
+    if (!plain || plain.length < 8) {
+        throw new Error('Password must be at least 8 characters');
+    }
+    this.passwordHash = await bcrypt.hash(plain, 12);
 };
 
-// Method to clear refresh token
-userSchema.methods.clearRefreshToken = function () {
-    this.refreshToken = undefined;
-    return this.save({ validateBeforeSave: false });
+
+userSchema.methods.validatePassword = async function validatePassword(plain) {
+    if (!this.passwordHash) return false; // OAuth users may not have a hash
+    return bcrypt.compare(plain, this.passwordHash);
 };
 
-const User = mongoose.model("User", userSchema);
+
+// Minimal public projection
+userSchema.methods.toPublic = function toPublic() {
+    return {
+        _id: this._id,
+        name: this.name,
+        email: this.email,
+        avatarUrl: this.avatarUrl,
+        role: this.role,
+        authProvider: this.authProvider,
+        createdAt: this.createdAt
+    };
+};
+
+
+const User = model('User', userSchema);
 export default User;
