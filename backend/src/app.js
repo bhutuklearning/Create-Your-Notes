@@ -16,8 +16,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
-app.use(cors());
+//app.use(helmet());
+app.use(
+    cors({
+        origin: "http://localhost:14000", // your frontend
+        credentials: true, // allow sending cookies
+    })
+);
 
 
 // Rate Limiter
@@ -33,8 +38,8 @@ app.use("/api/v1/", apiLimiter);
 
 // Routes
 app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/admin", adminRoute);
-app.use("/api/v1/notes", notesRoute);
+// app.use("/api/v1/admin", adminRoute);
+// app.use("/api/v1/notes", notesRoute);
 
 
 app.get('/', (req, res) => {
