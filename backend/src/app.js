@@ -9,6 +9,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js
 import authRoute from "./routes/auth.route.js";
 import adminRoute from "./routes/admin.routes.js";
 import notesRoute from "./routes/notes.route.js";
+import commentRoutes from "./routes/comments.route.js";
 
 const app = express();
 
@@ -16,7 +17,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-//app.use(helmet());
+app.use(helmet());
 app.use(
     cors({
         origin: "http://localhost:14000", // your frontend
@@ -39,7 +40,8 @@ app.use("/api/v1/", apiLimiter);
 // Routes
 app.use("/api/v1/auth", authRoute);
 // app.use("/api/v1/admin", adminRoute);
-// app.use("/api/v1/notes", notesRoute);
+app.use("/api/v1/notes", notesRoute);
+app.use("/api/v1/comments", commentRoutes);
 
 
 app.get('/', (req, res) => {
