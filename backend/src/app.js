@@ -35,6 +35,14 @@ const apiLimiter = rateLimit({
     message: { success: false, error: "Too many requests, please try again later." },
 });
 
+// Bypass limiter for admin routes
+app.use((req, res, next) => {
+    if (req.path.startsWith("/api/v1/admin")) {
+        return next();
+    }
+    return apiLimiter(req, res, next);
+});
+
 app.use("/api/v1/", apiLimiter);
 
 // Routes
