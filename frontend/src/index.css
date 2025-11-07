@@ -14,3 +14,10 @@
 .delay-200 {
   animation-delay: 0.6s;
 }
+
+
+
+
+body {
+  font-family: 'Inter', sans-serif;
+}
