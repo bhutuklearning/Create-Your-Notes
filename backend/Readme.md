@@ -74,15 +74,21 @@ backend/
    ```bash
    npm install
    ```
-4. Create a `.env` file in the `backend` directory and add the following environment variables:
+4. Create a `.env` file in the `backend` directory and add the following environment variables and you can take help from your `.env.sample` file.
+Create the environment variables in the .env file. For example:
    ```
    PORT=5000
    MONGO_URI=<your_mongodb_uri>
    JWT_SECRET=<your_jwt_secret>
    ```
 5. Start the server:
+   In development phase with nodemon:
    ```bash
-   npm start
+   npm run backend
+   ```
+   In production phase:
+   ```bash
+   npm run start
    ```
 
 ## API Documentation
