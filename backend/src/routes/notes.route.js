@@ -1,16 +1,32 @@
-import express from 'express';
-import { getAllNotes, getNotesById, createNote, updateNote, deleteNote, likeNote, searchNotes, disLikeNote } from '../controllers/notes.controller.js';
+import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware.js";
+import {
+    createNote,
+    getMyNotes,
+    getNoteBySlug,
+    updateNote,
+    deleteNote,
+    getPublicNotes,
+    likeNote,
+    unlikeNote,
+    searchNotes
+} from "../controllers/notes.controller.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get("/search", searchNotes);
-router.get('/', getAllNotes);
-router.post('/create-note', createNote);
-router.get('/:id', getNotesById);
-router.put('/:id', updateNote);
-router.post('/:id/like', likeNote);
-router.post('/:id/dislike', disLikeNote);
-router.delete('/:id', deleteNote);
+// Home route of the notes Routes
+router.get("/", protect, (req, res) => {
+    res.send("Welcome to the Notes routes of Create Your Notes API");
+});
+router.get("/search", protect, searchNotes);
 
+router.post("/create-note", protect, createNote);
+router.get("/my", protect, getMyNotes);
+router.get("/public", getPublicNotes);
+router.get("/:slug", protect, getNoteBySlug);
+router.put("/:id", protect, updateNote);
+router.delete("/:id", protect, deleteNote);
+router.post("/:id/like", protect, likeNote);
+router.post("/:id/unlike", protect, unlikeNote);
 
 export default router;

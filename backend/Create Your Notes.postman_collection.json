@@ -1,0 +1,325 @@
+{
+	"info": {
+		"_postman_id": "ddaae979-a565-438b-bf54-c9714e104206",
+		"name": "Create Your Notes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "31623578"
+	},
+	"item": [
+		{
+			"name": "Auth Routes",
+			"item": [
+				{
+					"name": "welcome page of Auth Route",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/auth"
+					},
+					"response": []
+				},
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"user5\",\r\n    \"email\": \"user5@gmail.com\",\r\n    \"password\": \"123456789\"\r\n}\r\n\r\n// {\r\n//   \"name\": \"Amrit\",\r\n//   \"email\": \"amrit@test.com\",\r\n//   \"password\": \"mypassword123\"\r\n// }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/auth/register"
+					},
+					"response": []
+				},
+				{
+					"name": "Login the user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user2@gmail.com\",\r\n    \"password\": \"123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "http://localhost:14000/api/v1/auth/logout"
+					},
+					"response": []
+				},
+				{
+					"name": "Profile Page",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "http://localhost:14000/api/v1/auth/profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/auth/refresh"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notes Routes",
+			"item": [
+				{
+					"name": "Home Page of Notes Route",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Notes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"My First Note\",\r\n  \"summary\": \"This is a quick description.\",\r\n  \"contentJSON\": { \"type\": \"doc\", \"content\": [] },\r\n  \"visibility\": \"public\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/notes/create-note"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes/my"
+					},
+					"response": []
+				},
+				{
+					"name": "Public Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes/public"
+					},
+					"response": []
+				},
+				{
+					"name": "Get notes by slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes/my-first-note-y262"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Notes",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"summary\": \"This is just the sample summary of my first note.\"\r\n \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/notes/690c2e07a51240824eae4605"
+					},
+					"response": []
+				},
+				{
+					"name": "Like Notes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes/690c2e07a51240824eae4605/like"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlike Notes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/notes/690c2e07a51240824eae4605/unlike"
+					},
+					"response": []
+				},
+				{
+					"name": "Deleting the Notes",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"summary\": \"This is just the sample summary of my first note.\"\r\n \r\n}"
+						},
+						"url": "http://localhost:14000/api/v1/notes/690c2e07a51240824eae4605"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:14000/api/v1/notes/search?q=first",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "14000",
+							"path": [
+								"api",
+								"v1",
+								"notes",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "first"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments Routes",
+			"item": [
+				{
+					"name": "Commenting on a note",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"body\": \"This is my first comment.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/comments/690c2e07a51240824eae4605"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comments for a note",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:14000/api/v1/comments/690c2e07a51240824eae4605?page=1&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "14000",
+							"path": [
+								"api",
+								"v1",
+								"comments",
+								"690c2e07a51240824eae4605"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit a comment",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"body\": \"This is my first comment. I am going to rock in this project.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:14000/api/v1/comments/edit/690c31b2a51240824eae4620"
+					},
+					"response": []
+				},
+				{
+					"name": "Deleting a comment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:14000/api/v1/comments/690c31b2a51240824eae4620"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Home Page",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:14000/"
+			},
+			"response": []
+		}
+	]
+}

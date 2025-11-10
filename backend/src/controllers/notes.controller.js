@@ -1,208 +1,173 @@
 import Note from "../models/Notes.model.js";
-import sanitizeHtml from "sanitize-html";
+import { catchAsync, ValidationError, NotFoundError, AuthError } from "../middlewares/error.middleware.js";
 
-export async function getAllNotes(req, res) {
-    try {
-        const allNotes = await Note.find().sort({ createdAt: -1 }); // Sort by creation date, newest first
-        res.status(200).json(allNotes);
-    } catch (error) {
-        console.error("Error fetching notes:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch notes" });
+/**
+ * Create a new note
+ * POST /api/notes
+ */
+export const createNote = catchAsync(async (req, res) => {
+    const { title, summary, contentJSON, visibility } = req.body;
+
+    if (!title || !contentJSON) {
+        throw new ValidationError("Title and content are required.");
     }
-}
 
-export async function getNotesById(req, res) {
-    try {
-        const note = await Note.findById(req.params.id);
+    const note = await Note.create({
+        author: req.user._id,
+        title,
+        summary,
+        contentJSON,
+        visibility: visibility || "private",
+    });
 
-        if (!note) {
-            return res.status(404).json({ error: "Note not found" });
-        }
-        res.status(200).json(note);
-    } catch (error) {
-        console.error("Error fetching note by ID:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch notes" });
+    res.status(201).json({
+        success: true,
+        message: "Note created successfully",
+        note,
+    });
+});
+
+
+/**
+ * Get all notes of logged-in user (PRIVATE dashboard)
+ * GET /api/notes/my
+ */
+export const getMyNotes = catchAsync(async (req, res) => {
+    const notes = await Note.find({ author: req.user._id }).notDeleted().sort({ createdAt: -1 });
+
+    res.json({
+        success: true,
+        count: notes.length,
+        notes,
+    });
+});
+
+
+/**
+ * Get a single note by slug (PUBLIC or OWNER)
+ * GET /api/notes/:slug
+ */
+export const getNoteBySlug = catchAsync(async (req, res) => {
+    const note = await Note.findOne({ slug: req.params.slug }).notDeleted();
+
+    if (!note) throw new NotFoundError("Note not found");
+
+    // If note is private → only author can view
+    if (note.visibility === "private" && note.author.toString() !== req.user._id.toString()) {
+        throw new AuthError("You are not allowed to view this private note");
     }
-}
 
-// CREATE a new note
-export async function createNote(req, res) {
-    try {
-        const { title, content, createdBy } = req.body;
-
-        if (!title || !content || !createdBy || !createdBy.name) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
-
-        // Sanitize rich text before saving
-        const cleanContent = sanitizeHtml(content, {
-            allowedTags: [
-                'p', 'b', 'i', 'em', 'strong', 'u', 'blockquote', 'code',
-                'ul', 'ol', 'li',
-                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-                'a', 'img', 'span', 'br', 'hr'
-            ],
-            allowedAttributes: {
-                a: ['href', 'name', 'target', 'rel'],
-                img: ['src', 'alt', 'title', 'width', 'height'],
-                '*': ['style'] // allow inline styles safely (with restrictions below)
-            },
-            allowedSchemes: ['http', 'https', 'mailto'],
-            allowedSchemesByTag: {
-                img: ['http', 'https', 'data'] // allow base64 images (common in rich text editors)
-            },
-            allowProtocolRelative: true,
-            // To prevent malicious CSS (like `background:url(javascript:alert(1))`)
-            allowedStyles: {
-                '*': {
-                    // Allow only safe inline styles
-                    'color': [/^#(0-9a-fA-F)+$/, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
-                    'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/],
-                    'font-size': [/^\d+(?:px|em|%)$/],
-                    'background-color': [/^#(0-9a-fA-F)+$/, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/]
-                }
-            },
-            transformTags: {
-                'a': (tagName, attribs) => {
-                    return {
-                        tagName: 'a',
-                        attribs: {
-                            ...attribs,
-                            rel: 'noopener noreferrer', // security best practice
-                            target: '_blank', // open links in new tab
-                        }
-                    };
-                }
-            }
-        });
-
-        const newNote = new Note({
-            title: title.trim(),
-            content: cleanContent,
-            likes: 0,
-            createdBy: {
-                name: createdBy.name.trim(),
-                socialLink: createdBy.socialLink || null,
-            },
-        });
-
-        const savedNote = await newNote.save();
-
-        res.status(201).json({ success: true, message: "Note created successfully", data: savedNote });
-    } catch (error) {
-        console.error("Error creating note:", error);
-        res.status(500).json({ success: false, message: "Failed to create note", error: error.message });
-    }
-}
-
-export async function updateNote(req, res) {
-    try {
-        const { title, content, createdBy } = req.body;
-
-        const updateNote = await Note.findByIdAndUpdate(
-            req.params.id,
-            {
-                title: title ? title.trim() : undefined,
-                content: content ? sanitizeHtml(content, {
-                    allowedTags: ['p', 'b', 'i', 'em', 'strong', 'u', 'blockquote', 'code', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'img'],
-                }) : undefined,
-                createdBy: {
-                    name: createdBy ? createdBy.name.trim() : undefined,
-                    socialLink: createdBy ? createdBy.socialLink : undefined,
-                },
-            },
-            { new: true } // return the updated document
-        );
-
-        if (!updateNote) {
-            res.status(404).json({ message: "Note not found" });
-        }
-        res.status(200).json({ success: true, message: "Note updated successfully", data: updateNote });
-    }
-    catch (error) {
-        console.error("Error updating note:", error);
-        res.status(500).json({ success: false, message: "Failed to update note", error: error.message });
-    }
-}
+    res.json({
+        success: true,
+        note,
+    });
+});
 
 
-export async function deleteNote(req, res) {
-    try {
-        const deletedNote = await Note.findByIdAndDelete(req.params.id);
-        if (!deletedNote) {
-            return res.status(404).json({ success: false, message: "Note not found" });
-        }
-        res.status(200).json({ success: true, message: "Note deleted successfully" });
-    }
-    catch (error) {
-        console.error("Error deleting note:", error);
-        res.status(500).json({ success: false, message: "Failed to delete note", error: error.message });
-    }
-}
+/**
+ * Update a note (author only)
+ * PATCH /api/notes/:id
+ */
+export const updateNote = catchAsync(async (req, res) => {
+    const { title, summary, contentJSON, visibility } = req.body;
 
-export async function likeNote(req, res) {
-    try {
-        const note = await Note.findById(req.params.id);
-        if (!note) {
-            return res.status(404).json({ error: "Note not found" });
-        }
+    const note = await Note.findOne({ _id: req.params.id, author: req.user._id }).notDeleted();
+    if (!note) throw new NotFoundError("Note not found or you do not own this note");
 
-        note.likes += 1; // increment like count
-        await note.save();
+    if (title) note.title = title;
+    if (summary) note.summary = summary;
+    if (contentJSON) note.contentJSON = contentJSON;
+    if (visibility) note.visibility = visibility;
 
-        res.json({ likes: note.likes, noteId: note._id, note: note, message: "Note liked successfully" });
-    }
-    catch (error) {
-        console.error("Error liking note:", error);
-        res.status(500).json({ success: false, message: "Failed to like note", error: error.message });
-    }
-}
+    await note.save();
 
-export async function disLikeNote(req, res) {
-    try {
-        const note = await Note.findById(req.params.id);
-        if (!note) {
-            return res.status(404).json({ error: "Note not found" });
-        }
+    res.json({
+        success: true,
+        message: "Note updated successfully",
+        note,
+    });
+});
 
-        note.likes -= 1; // increment like count
-        await note.save();
 
-        res.json({ likes: note.likes, noteId: note._id, note: note, message: "Note unliked successfully" });
-    }
-    catch (error) {
-        console.error("Error liking note:", error);
-        res.status(500).json({ success: false, message: "Failed to like note", error: error.message });
-    }
-}
+/**
+ * Soft delete a note (author only)
+ * DELETE /api/notes/:id
+ */
+export const deleteNote = catchAsync(async (req, res) => {
+    const note = await Note.findOne({ _id: req.params.id, author: req.user._id }).notDeleted();
+    if (!note) throw new NotFoundError("Note not found or you do not own this note");
 
-// Search Notes by title, content, or creator name
-export const searchNotes = async (req, res) => {
-    try {
-        const { q } = req.query; // e.g. /search?q=first
+    note.deletedAt = new Date();
+    await note.save();
 
-        if (!q || q.trim() === "") {
-            return res.status(400).json({ message: "Search query is required" });
-        }
+    res.json({
+        success: true,
+        message: "Note deleted successfully",
+    });
+});
 
-        // Case-insensitive regex for searching in multiple fields
-        const regex = new RegExp(q, "i");
 
-        const notes = await Note.find({
-            $or: [
-                { title: regex },
-                { content: regex },
-                { "createdBy.name": regex } // searching inside embedded object
-            ]
-        });
+/**
+ * Public feed (Explore page)
+ * GET /api/notes/public
+ */
+export const getPublicNotes = catchAsync(async (req, res) => {
+    const notes = await Note.find().publicOnly().sort({ publishedAt: -1 });
 
-        if (!notes || notes.length === 0) {
-            return res.status(404).json({ message: "No matching notes found" });
-        }
+    res.json({
+        success: true,
+        count: notes.length,
+        notes,
+    });
+});
 
-        res.status(200).json({ results: notes });
-    } catch (error) {
-        console.error("Error searching notes:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
+
+/**
+ * Like a note
+ * POST /api/notes/:id/like
+ */
+export const likeNote = catchAsync(async (req, res) => {
+    const note = await Note.findById(req.params.id).notDeleted();
+    if (!note) throw new NotFoundError("Note not found");
+
+    await note.likeBy(req.user._id);
+
+    res.json({ success: true, message: "Note liked" });
+});
+
+
+/**
+ * Unlike a note
+ * POST /api/notes/:id/unlike
+ */
+export const unlikeNote = catchAsync(async (req, res) => {
+    const note = await Note.findById(req.params.id).notDeleted();
+    if (!note) throw new NotFoundError("Note not found");
+
+    await note.unlikeBy(req.user._id);
+
+    res.json({ success: true, message: "Note unliked" });
+});
+
+
+
+/**
+ * Search Notes (Public only)
+ * GET /api/notes/search?q=keyword
+ */
+export const searchNotes = catchAsync(async (req, res) => {
+    const q = req.query.q;
+    if (!q) throw new ValidationError("Search query is required");
+
+    const notes = await Note.find({
+        $text: { $search: q },
+        visibility: "public",
+        deletedAt: { $exists: false }
+    }).sort({ publishedAt: -1 });
+
+    res.json({
+        success: true,
+        count: notes.length,
+        notes,
+    });
+});
