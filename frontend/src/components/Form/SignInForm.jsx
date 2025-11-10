@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 
 const SignInForm = () => {
@@ -22,8 +23,12 @@ const SignInForm = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log("Response:", data);
-      alert("Login successful!");
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.message || "Login failed");
+      }
     } catch (error) {
       console.error(error);
       alert("Something went wrong!");
@@ -95,7 +100,13 @@ const SignInForm = () => {
           {/* Sign up link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Don't have an account?{" "}
-            <span className="text-orange-500 cursor-pointer">Sign up</span> Here
+            <Link
+              to="/signup"
+              className="text-orange-500 hover:text-orange-600"
+            >
+              Sign up
+            </Link>{" "}
+            here
           </p>
         </div>
       </div>

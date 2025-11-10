@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaBell, FaSearch, FaPen } from "react-icons/fa";
 import { FaBars, FaTimes } from "react-icons/fa";
 
@@ -40,7 +41,9 @@ const TopNavbar = ({ onMenuToggle, isSidebarOpen }) => {
       </div>
 
       <div className="flex items-center gap-3 sm:gap-5 relative">
-        <FaPen className="hidden sm:block text-gray-600 hover:text-gray-900 cursor-pointer text-lg transition" />
+        <Link to="/editor">
+          <FaPen className="hidden sm:block text-gray-600 hover:text-gray-900 cursor-pointer text-lg transition" />
+        </Link>
         <FaBell className="text-gray-600 hover:text-gray-900 cursor-pointer text-lg transition" />
 
         <div className="relative">

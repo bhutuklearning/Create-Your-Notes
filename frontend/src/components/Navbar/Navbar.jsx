@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { navData } from "../../utils/navData.js";
 
@@ -47,10 +48,10 @@ const Navbar = () => {
       {/* Navbar container */}
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src="/logo.webp" alt="Logo" className="h-7 w-auto" />
           <span className="text-lg font-semibold text-gray-800">AcNote</span>
-        </a>
+        </Link>
 
         {/* Menu (Desktop) */}
         <div className="hidden md:flex items-center gap-6">
@@ -107,18 +108,18 @@ const Navbar = () => {
 
         {/* Buttons (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
-          <a
-            href="#"
+          <Link
+            to="/signin"
             className="text-gray-700 border border-gray-300 px-4 py-1 rounded-md hover:bg-gray-100"
           >
             Log in
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            to="/signup"
             className="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
           >
             Start for free
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Icon */}

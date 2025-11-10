@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaCheckSquare } from "react-icons/fa";
 
-const SignUp= () => {
+const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -55,10 +56,9 @@ const SignUp= () => {
           className="w-full h-auto object-contain max-w-lg"
         />
         <div className="w-full h-auto object-contain max-w-lg">
-          
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate
-            temporibus facilis vero optio qui eveniet consequatur cum illo
-            quisquam praesentium.
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate
+          temporibus facilis vero optio qui eveniet consequatur cum illo
+          quisquam praesentium.
         </div>
       </div>
 
@@ -157,7 +157,13 @@ const SignUp= () => {
           {/* Sign in link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Already have an account?{" "}
-            <span className="text-orange-500 cursor-pointer">Sign in</span> Here
+            <Link
+              to="/signin"
+              className="text-orange-500 hover:text-orange-600"
+            >
+              Sign in
+            </Link>{" "}
+            here
           </p>
         </div>
       </div>
