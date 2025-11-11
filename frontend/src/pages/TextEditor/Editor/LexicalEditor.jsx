@@ -9,6 +9,8 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { LinkNode, AutoLinkNode } from "@lexical/link";
 import { CodeNode } from "@lexical/code";
+// Custom nodes
+import { ImageNode } from "./nodes";
 
 import EditorTheme from "./theme/EditorTheme";
 import AutoFocusPlugin from "./plugins/AutoFocusPlugin";
@@ -37,6 +39,7 @@ export default function LexicalEditor({
   showDebug = false,
   showStats = true,
   maxLength = null,
+  initialContent = null,
 }) {
   const [editorState, setEditorState] = useState(null);
 
@@ -59,6 +62,7 @@ export default function LexicalEditor({
     onError: (error) => {
       console.error("Lexical Error:", error);
     },
+    editorState: initialContent ? JSON.stringify(initialContent) : undefined,
     nodes: [
       HeadingNode,
       QuoteNode,
@@ -67,6 +71,7 @@ export default function LexicalEditor({
       LinkNode,
       AutoLinkNode,
       CodeNode,
+      ImageNode,
     ],
   };
 

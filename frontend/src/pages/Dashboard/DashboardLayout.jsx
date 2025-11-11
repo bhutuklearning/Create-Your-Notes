@@ -1,8 +1,11 @@
 import React from "react";
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import TopNavbar from "./TopNavbar";
 import LeftSidebar from "./LeftSidebar";
 import Feed from "./Feed";
+import Library from "./Library";
+import Profile from "./Profile";
 import Sidebar from "./Sidebar";
 
 // Main Dashboard Layout
@@ -30,9 +33,13 @@ const DashboardLayout = () => {
         {/* Center + Right Content */}
         <div className="flex-1 max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 p-4 sm:p-6 lg:p-8">
-            {/* Feed Section */}
+            {/* Main Content Section */}
             <main className="min-w-0">
-              <Feed />
+              <Routes>
+                <Route index element={<Feed />} />
+                <Route path="library" element={<Library />} />
+                <Route path="profile" element={<Profile />} />
+              </Routes>
             </main>
 
             {/* Right Sidebar - Hidden on mobile/tablet */}

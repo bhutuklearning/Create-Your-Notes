@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaLock, FaCheckSquare } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -11,36 +12,61 @@ const SignUp = () => {
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(""); // Clear error when user types
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e?.preventDefault(); // Prevent form submission if called from button
+    setError("");
+
+    // Validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      setError("Passwords don't match!");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
       return;
     }
 
     if (!agreedToTerms) {
-      alert("Please agree to terms & conditions");
+      setError("Please agree to terms & conditions");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
-      const data = await res.json();
-      console.log("Response:", data);
-      alert("Account created successfully!");
+
+      if (result.success) {
+        navigate("/dashboard");
+      } else {
+        setError(result.message || "Registration failed");
+      }
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong!");
+      console.error("Registration error:", error);
+      if (error.message?.includes("connect to server") || error.code === "ERR_NETWORK") {
+        setError("Cannot connect to server. Please make sure the backend is running.");
+      } else {
+        setError(error.message || "Something went wrong! Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -137,7 +163,10 @@ const SignUp = () => {
               type="checkbox"
               id="terms"
               checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              onChange={(e) => {
+                setAgreedToTerms(e.target.checked);
+                setError(""); // Clear error when checkbox is toggled
+              }}
               className="w-4 h-4 mr-2"
             />
             <label htmlFor="terms" className="text-sm text-gray-700">
@@ -145,11 +174,18 @@ const SignUp = () => {
             </label>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded transition"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Loading..." : "Sign up"}
           </button>

@@ -11,11 +11,11 @@ const EditorLayout = () => {
       <div className="bg-yellow-400 px-4 py-2 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <Star size={16} className="fill-black" />
-          <span className="font-medium">Get 7 days of free trial.</span>
-          <span className="text-gray-700">Enjoy Notes without limits</span>
+          <span className="font-medium">Our App is in Build in Phase </span>
+          <span className="text-gray-700">Feel Free To share You Thoughts </span>
         </div>
         <button className="bg-black text-white px-4 py-1 rounded text-sm font-medium hover:bg-gray-800 transition-colors">
-          Continue
+           Give Your  Feedback
         </button>
       </div>
 

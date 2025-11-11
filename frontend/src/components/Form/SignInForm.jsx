@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 
 const SignInForm = () => {
   const [formData, setFormData] = useState({
@@ -8,30 +9,55 @@ const SignInForm = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(""); // Clear error when user types
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e?.preventDefault(); // Prevent form submission if called from button
     setLoading(true);
+    setError("");
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        window.location.href = "/dashboard";
+      const result = await login(formData);
+      if (result.success) {
+        navigate("/dashboard");
       } else {
-        alert(data.message || "Login failed");
+        setError(result.message || "Login failed. Please check your credentials.");
       }
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong!");
+      console.error("Login error:", error);
+      // Extract error message from response
+      const errorMessage = 
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong! Please try again.";
+      
+      if (
+        errorMessage.includes("connect to server") ||
+        error.code === "ERR_NETWORK"
+      ) {
+        setError(
+          "Cannot connect to server. Please make sure the backend is running."
+        );
+      } else if (error.response?.status === 401) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -88,11 +114,18 @@ const SignInForm = () => {
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded transition"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Loading..." : "Sign in"}
           </button>

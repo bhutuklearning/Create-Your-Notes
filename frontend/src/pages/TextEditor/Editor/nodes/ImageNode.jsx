@@ -1,4 +1,5 @@
 import { DecoratorNode } from "lexical";
+import ImageComponent from "./ImageComponent";
 
 // This class defines an Image Node
 export class ImageNode extends DecoratorNode {

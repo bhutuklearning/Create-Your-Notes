@@ -1,24 +1,46 @@
-import React from "react";
+  import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
+import * as notesService from "../../services/notesService";
 
 const Sidebar = () => {
-  const staffPicks = [
-    {
-      title: "Can't believe I'm just a dateline to my friends.",
-      author: "Jael Holtzman",
-      date: "Oct 26",
-    },
-    {
-      title: "I Bought a Witches' Prison",
-      author: "Jeff Maysh",
-      date: "Oct 28, 2020",
-    },
-    {
-      title: "Should You Let Your Kid Wear That?",
-      author: "Kaitlin Moran",
-      date: "Oct 21",
-    },
-  ];
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    let timeoutId;
+    
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        const resp = await notesService.getPublicNotes();
+        if (mounted && resp && resp.notes) {
+          setNotes(resp.notes.slice(0, 5));
+        }
+      } catch (err) {
+        if (mounted) {
+          console.error("Failed to load sidebar notes:", err);
+          // Don't show error for rate limiting in sidebar (it's not critical)
+          if (err.response?.status !== 429) {
+            setError("Failed to load feed");
+          }
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    
+    // Small delay to prevent simultaneous requests with Feed component
+    timeoutId = setTimeout(load, 100);
+    
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
 
   const topics = [
     "Self Improvement",
@@ -33,34 +55,44 @@ const Sidebar = () => {
     <aside className="space-y-8 sticky top-4">
       <section>
         <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <FaStar className="text-yellow-500 text-sm" /> Staff Picks
+          <FaStar className="text-yellow-500 text-sm" /> From the feed
         </h2>
 
-        <ul className="space-y-4">
-          {staffPicks.map((pick, index) => (
-            <li
-              key={index}
-              className="pb-3 border-b border-gray-100 last:border-none"
-            >
-              <a
-                href="#"
-                className="block text-sm text-gray-900 font-medium hover:text-gray-700 transition mb-1 leading-snug"
+        {loading ? (
+          <div className="text-sm text-gray-500">Loading feed…</div>
+        ) : error ? (
+          <div className="text-sm text-red-500">{error}</div>
+        ) : (
+          <ul className="space-y-4">
+            {notes.map((n) => (
+              <li
+                key={n._id}
+                className="pb-3 border-b border-gray-100 last:border-none"
               >
-                {pick.title}
-              </a>
-              <p className="text-xs text-gray-500">
-                <span className="font-medium">{pick.author}</span> · {pick.date}
-              </p>
-            </li>
-          ))}
-        </ul>
+                <Link
+                  to={`/notes/${n.slug}`}
+                  className="block text-sm text-gray-900 font-medium hover:text-gray-700 transition mb-1 leading-snug"
+                >
+                  {n.title}
+                </Link>
+                <p className="text-xs text-gray-500">
+                  <span className="font-medium">
+                    {n.author?.name || "Unknown"}
+                  </span>{" "}
+                  ·{" "}
+                  {new Date(n.publishedAt || n.createdAt).toLocaleDateString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
 
-        <a
-          href="#"
+        <Link
+          to="/dashboard"
           className="inline-block mt-3 text-sm font-medium text-green-700 hover:text-green-800"
         >
           See the full list
-        </a>
+        </Link>
       </section>
 
       <section>
@@ -69,30 +101,23 @@ const Sidebar = () => {
         </h2>
         <div className="flex flex-wrap gap-2">
           {topics.map((topic, index) => (
-            <a
+            <button
               key={index}
-              href="#"
               className="px-4 py-2 text-xs font-medium bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition"
             >
               {topic}
-            </a>
+            </button>
           ))}
         </div>
-        <a
-          href="#"
-          className="inline-block mt-4 text-sm font-medium text-green-700 hover:text-green-800"
-        >
+        <button className="inline-block mt-4 text-sm font-medium text-green-700 hover:text-green-800">
           See more topics
-        </a>
+        </button>
       </section>
 
       <section>
-        <a
-          href="#"
-          className="text-sm text-green-700 hover:text-green-800 font-medium"
-        >
+        <button className="text-sm text-green-700 hover:text-green-800 font-medium">
           Write to follow
-        </a>
+        </button>
       </section>
     </aside>
   );

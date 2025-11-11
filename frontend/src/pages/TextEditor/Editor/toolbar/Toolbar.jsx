@@ -12,6 +12,7 @@ import {
   AlignRight,
   AlignJustify,
   Link,
+  Image,
   Undo,
   Redo,
 } from "lucide-react";
@@ -30,6 +31,8 @@ import { TOGGLE_LINK_COMMAND } from "@lexical/link";
 
 import ToolbarButton from "./ToolbarButton";
 import BlockFormatDropdown from "./BlockFormatDropdown";
+import { $createImageNode } from "../nodes/ImageNode";
+import { $insertNodes } from "lexical";
 
 const Divider = () => <div className="toolbar-divider" />;
 
@@ -179,6 +182,45 @@ export default function Toolbar({
         active={isLink}
         icon={<Link size={18} />}
         title="Insert Link"
+      />
+      {/* Image (insert via URL or file upload) */}
+      <ToolbarButton
+        onClick={() => {
+          // Create file input for image upload
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
+          input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              // Create a FileReader to convert file to data URL
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const dataUrl = event.target.result;
+                try {
+                  editor.update(() => {
+                    const img = $createImageNode({
+                      src: dataUrl,
+                      altText: file.name || "Image",
+                      width: "auto",
+                      height: "auto",
+                    });
+                    $insertNodes([img]);
+                  });
+                } catch (err) {
+                  console.error("Failed to insert image:", err);
+                }
+              };
+              reader.onerror = () => {
+                console.error("Failed to read file");
+              };
+              reader.readAsDataURL(file);
+            }
+          };
+          input.click();
+        }}
+        icon={<Image size={18} />}
+        title="Insert Image (Upload or URL)"
       />
     </div>
   );

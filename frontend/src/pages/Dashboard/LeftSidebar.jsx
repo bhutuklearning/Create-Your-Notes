@@ -1,13 +1,15 @@
 import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaBook, FaUser, FaChartBar } from "react-icons/fa";
 
-
 const LeftSidebar = ({ isOpen, onClose }) => {
+  const location = useLocation();
+  
   const items = [
-    { icon: <FaHome />, label: "Home" },
-    { icon: <FaBook />, label: "Library" },
-    { icon: <FaUser />, label: "Profile" },
-    { icon: <FaChartBar />, label: "Stats" },
+    { icon: <FaHome />, label: "Home", path: "/dashboard" },
+    { icon: <FaBook />, label: "Library", path: "/dashboard/library" },
+    { icon: <FaUser />, label: "Profile", path: "/dashboard/profile" },
+    // { icon: <FaChartBar />, label: "Stats", path: "#" },
   ];
 
   return (
@@ -27,16 +29,24 @@ const LeftSidebar = ({ isOpen, onClose }) => {
         `}
       >
         <div className="flex flex-col gap-10 p-4 pt-20 lg:pt-4">
-          {items.map((item, i) => (
-            <a
-              key={i}
-              href="#"
-              className="flex items-center gap-5 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium text-sm transition-all"
-            >
-              <span className="text-lg">{item.icon}</span>
-              <span>{item.label}</span>
-            </a>
-          ))}
+          {items.map((item, i) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={i}
+                to={item.path}
+                onClick={onClose}
+                className={`flex items-center gap-5 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </aside>
     </>

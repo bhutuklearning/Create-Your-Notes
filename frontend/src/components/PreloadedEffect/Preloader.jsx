@@ -8,7 +8,7 @@ const Preloader = ({ onFinish }) => {
     const timer = setTimeout(() => {
       setIsVisible(false);
       if (onFinish) onFinish();
-    }, 1000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [onFinish]);
 
@@ -71,7 +71,7 @@ const Preloader = ({ onFinish }) => {
                 >
                   New{" "}
                   <motion.span
-                    className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent"
+                    className="bg-linear-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent"
                     animate={{
                       backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                     }}
@@ -161,7 +161,7 @@ const Preloader = ({ onFinish }) => {
                 <motion.img
                   src="/preloading.png"
                   alt="Loading Illustration"
-                  className="relative  w-80 h-96 sm:w-96 sm:h-120 md:w-[28rem] md:h-[36rem] lg:w-[32rem] lg:h-[40rem] rounded-3xl shadow-2xl object-contain  "
+                  className="relative  w-80 h-96 sm:w-96 sm:h-120 md:w-md md:h-144 lg:w-lg lg:h-160 rounded-3xl shadow-2xl object-contain  "
                   initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
                   animate={{
                     scale: 1,
