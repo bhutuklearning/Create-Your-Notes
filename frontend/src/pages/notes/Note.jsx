@@ -11,24 +11,25 @@ import {
   FaClock,
 } from "react-icons/fa";
 import * as notesService from "../../services/notesService";
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext";
 import LexicalViewer from "../TextEditor/Editor/LexicalViewer";
 import Comments from "./Comments";
 
 const Note = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  // const { isAuthenticated } = useAuth();
+  const isAuthenticated = true; // Temporary: AuthProvider is commented out
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/signin");
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   navigate("/signin");
+    //   return;
+    // }
     fetchNote();
   }, [slug, isAuthenticated]);
 

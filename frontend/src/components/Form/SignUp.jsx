@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock, FaCheckSquare } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaCheckSquare, FaArrowLeft } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 
 const SignUp = () => {
@@ -91,6 +91,14 @@ const SignUp = () => {
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-100 p-8">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+          {/* Back to Home Link */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors text-sm"
+          >
+            <FaArrowLeft />
+            Back to Home
+          </Link>
           <h2 className="text-2xl font-bold text-gray-800 mb-8">
             Create account
           </h2>

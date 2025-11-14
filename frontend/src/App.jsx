@@ -1,6 +1,6 @@
 import React from "react";
-import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import ProtectedRoute from "./components/PreloadedEffect/ProtectedRoute";
@@ -13,6 +13,22 @@ import EditorLayout from "./pages/TextEditor/EditorLayout";
 import Note from "./pages/notes/Note";
 import Profile from "./pages/Dashboard/Profile";
 
+// Component to handle smooth scroll to top on route changes
+const ScrollToTop = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Smooth scroll to top on route change
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [location]);
+  
+  return null;
+};
+
 function App() {
   const [showPreloader, setShowPreloader] = useState(true);
 
@@ -20,6 +36,7 @@ function App() {
     <Preloader onFinish={() => setShowPreloader(false)} />
   ) : (
     <BrowserRouter>
+      <ScrollToTop />
       <ToastProvider>
         <AuthProvider>
           <main>
@@ -55,7 +72,7 @@ function App() {
                 }
               />
               <Route
-                path="/notes/:slug"
+                path="/profile"
                 element={
                   <ProtectedRoute>
                     <Profile />

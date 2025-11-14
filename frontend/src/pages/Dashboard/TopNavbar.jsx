@@ -96,7 +96,7 @@ const TopNavbar = ({ onMenuToggle, isSidebarOpen }) => {
         </button>
 
         <img
-          src="./logo.webp"
+          src="/logo.webp"
           alt="AcNote"
           className="w-7 h-7 sm:w-8 sm:h-8 rounded"
         />
@@ -180,7 +180,7 @@ const TopNavbar = ({ onMenuToggle, isSidebarOpen }) => {
             className="focus:outline-none"
           >
             <img
-              src="./wallpaper.gif"
+              src="/wallpaper.gif"
               alt={user?.name || "User"}
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-gray-200 hover:border-gray-400 transition"
             />

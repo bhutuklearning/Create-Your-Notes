@@ -8,8 +8,8 @@
       headers: { "Content-Type": "application/json" },
     });
 
-    // Minimal error handling: show friendly message for network errors,
-    // and redirect to signin on 401 for non-auth endpoints.
+    // Minimal error handling: show friendly message for network errors.
+    // Note: 401 redirects are handled by ProtectedRoute component for smooth navigation.
     api.interceptors.response.use(
       (res) => res,
       (err) => {
@@ -17,15 +17,8 @@
           return Promise.reject({ ...err, message: "Cannot connect to server." });
         }
 
-        const status = err.response?.status;
-        const url = err.config?.url || "";
-
-        // Redirect to signin for 401 on protected endpoints
-        if (status === 401 && !url.includes("/auth/")) {
-          if (window.location.pathname !== "/signin") {
-            window.location.href = "/signin";
-          }
-        }
+        // Don't redirect here - let ProtectedRoute handle it for smooth navigation
+        // The ProtectedRoute component will handle 401 redirects using React Router
 
         return Promise.reject(err);
       }

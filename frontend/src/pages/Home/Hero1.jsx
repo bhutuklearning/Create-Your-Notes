@@ -30,7 +30,7 @@ const Hero1 = () => {
         {/* Right Section - Image */}
         <div className="flex justify-center items-center mt-8 md:mt-0  sm:col-span-2">
           <img
-            src="/wallpaper.gif"
+            src="/hero1.jpg"
             alt="App Preview"
             className="w-full h-full object-cover rounded-2xl"
           />
