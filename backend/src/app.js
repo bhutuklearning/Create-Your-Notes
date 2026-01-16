@@ -1,11 +1,14 @@
-import express from 'express';
-import helmet from 'helmet';
+import express from "express";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
-import cors from 'cors';
+import cors from "cors";
 
-
-import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
+import { ENV } from "./config/env.js";
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./middlewares/error.middleware.js";
 import authRoute from "./routes/auth.route.js";
 import adminRoute from "./routes/admin.route.js";
 import notesRoute from "./routes/notes.route.js";
@@ -18,31 +21,35 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
+
+// CORS configuration
 app.use(
-    cors({
-        origin: "http://localhost:14000", // your frontend
-        credentials: true, // allow sending cookies
-    })
+  cors({
+    origin:
+      ENV.NODE_ENV === "development"
+        ? true // Allow all origins in development (for localhost on any port)
+        : ENV.FRONTEND_URL || "http://localhost:3000", // Use env variable in production
+    credentials: true, // allow sending cookies
+  })
 );
 
-
-// Rate Limiter
+// Rate Limiter - More lenient for development
 const apiLimiter = rateLimit({
-    windowMs: 3 * 60 * 1000,
-    max: 60,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, error: "Too many requests, please try again later." },
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: ENV.NODE_ENV === "development" ? 200 : 100, // Higher limit in development
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: "Too many requests, please try again later.",
+  },
+  skip: (req) => {
+    // Skip rate limiting for admin routes
+    return req.path.startsWith("/api/v1/admin");
+  },
 });
 
-// Bypass limiter for admin routes
-app.use((req, res, next) => {
-    if (req.path.startsWith("/api/v1/admin")) {
-        return next();
-    }
-    return apiLimiter(req, res, next);
-});
-
+// Apply rate limiter to all API routes (only once)
 app.use("/api/v1/", apiLimiter);
 
 // Routes
@@ -51,9 +58,8 @@ app.use("/api/v1/admin", adminRoute);
 app.use("/api/v1/notes", notesRoute);
 app.use("/api/v1/comments", commentRoutes);
 
-
-app.get('/', (req, res) => {
-    res.send('Hello, World from the backend of Create Your notes App!');
+app.get("/", (req, res) => {
+  res.send("Hello, World from the backend of Create Your notes App!");
 });
 
 // Error Handling Middleware
